@@ -2,7 +2,8 @@
 
 var soundButtons = document.querySelectorAll('.button-sound'),
     ipc = require('ipc'),
-    closeEl,
+    closeEl = document.querySelector('.close'),
+    settingsEl = document.querySelector('.settings'),
     i;
 
 for (i = 0; i < soundButtons.length; i++) {
@@ -22,7 +23,6 @@ function prepareButton(buttonEl, soundName) {
     });
 }
 
-closeEl = document.querySelector('.close');
 closeEl.addEventListener('click', function () {
     ipc.send('close-main-window'); // communicating this render process to the main proces (see main.js)
 });
@@ -30,4 +30,8 @@ closeEl.addEventListener('click', function () {
 ipc.on('global-shortcut', function (arg) {
     var event = new MouseEvent('click');
     soundButtons[arg].dispatchEvent(event);
+});
+
+settingsEl.addEventListener('click', function () {
+    ipc.send('open-settings-window');
 });

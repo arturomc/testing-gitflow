@@ -11,7 +11,8 @@ var app = require('app'),
     ipc = require('ipc'), 
     // main applicaiton window, null because the window would otherwise be closed
     // once JS's garbage collection kicks in.
-    mainWindow = null;
+    mainWindow = null,
+    settingsWindow = null;
 
 app.on('ready', function () { //reacting to the ready state of the application
     // this window's renderer process will render index.html
@@ -42,4 +43,29 @@ app.on('ready', function () { //reacting to the ready state of the application
 // listening on the close-main-window channel
 ipc.on('close-main-window', function () {
     app.quit();
+});
+
+ipc.on('open-settings-window', function () {
+    if (settingsWindow) {
+        return;
+    }
+
+    settingsWindow = new BrowserWindow({
+        frame: false,
+        height: 200,
+        resizable: false,
+        width: 200
+    });
+
+    settingsWindow.loadUrl('file://' + __dirname + '/app/settings.html');
+
+    settingsWindow.on('closed', function () {
+        settingsWindow = null;
+    });
+});
+
+ipc.on('close-settings-window', function () {
+    if (settingsWindow) {
+        settingsWindow.close();
+    }
 });
