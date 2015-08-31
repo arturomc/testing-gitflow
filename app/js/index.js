@@ -26,3 +26,8 @@ closeEl = document.querySelector('.close');
 closeEl.addEventListener('click', function () {
     ipc.send('close-main-window'); // communicating this render process to the main proces (see main.js)
 });
+
+ipc.on('global-shortcut', function (arg) {
+    var event = new MouseEvent('click');
+    soundButtons[arg].dispatchEvent(event);
+});

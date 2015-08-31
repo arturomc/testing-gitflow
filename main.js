@@ -6,6 +6,7 @@
 
 var app = require('app'),
     BrowserWindow = require('browser-window'), //allows window creation
+    globalShortcut = require('global-shortcut'), // allows the use of accelerators (keyboard combinations)
     // adding inter-process-communication (to communicate render processes and main process through chanels)
     ipc = require('ipc'), 
     // main applicaiton window, null because the window would otherwise be closed
@@ -22,6 +23,20 @@ app.on('ready', function () { //reacting to the ready state of the application
     });
 
     mainWindow.loadUrl('file://' + __dirname + '/app/index.html');
+
+    /*
+        Registering the shortcuts for the app
+     */
+
+    globalShortcut.register('ctrl+shift+1', function () {
+        // sending a message on the global-shortcut channel with an argument
+        mainWindow.webContents.send('global-shortcut', 0); 
+    });
+
+    globalShortcut.register('ctrl+shift+2', function () {
+        mainWindow.webContents.send('global-shortcut', 1);
+    });
+
 });
 
 // listening on the close-main-window channel
