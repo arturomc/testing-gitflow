@@ -27,14 +27,15 @@ app.on('ready', function () { //reacting to the ready state of the application
 
     // this window's renderer process will render index.html
     mainWindow = new BrowserWindow({
-        frame: false,
+        //frame: false,
         heihgt: 700,
-        resizable: false,
+        //resizable: false,
         width: 368
     });
 
     mainWindow.loadUrl('file://' + __dirname + '/app/index.html');
 });
+<<<<<<< HEAD
 
 function setGlobalShortcuts() {
     // resets the global shortcuts so that we can set new ones
@@ -44,6 +45,17 @@ function setGlobalShortcuts() {
         // transforming the settings into an accelerator compatible string
         shortcutPrefix = shortcutKeysSetting.length === 0 ? '' : shortcutKeysSetting.join('+') + '+';
 
+=======
+
+function setGlobalShortcuts() {
+    // resets the global shortcuts so that we can set new ones
+    globalShortcut.unregisterAll();
+
+    var shortcutKeysSetting = configuration.readSettings('shortcutKeys'),
+        // transforming the settings into an accelerator compatible string
+        shortcutPrefix = shortcutKeysSetting.length === 0 ? '' : shortcutKeysSetting.join('+') + '+';
+
+>>>>>>> 789850b9cc229f9d4d8d7a8d2b498379c175e1ef
     globalShortcut.register(shortcutPrefix + '1', function () {
         mainWindow.webContents.send('global-shortcut', 0);
     });
