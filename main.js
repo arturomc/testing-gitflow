@@ -6,6 +6,7 @@
 
 var app = require('app'),
     BrowserWindow = require('browser-window'), //allows window creation
+    configuration = require('./configuration'), // custom module that wraps nconf (a node module)
     globalShortcut = require('global-shortcut'), // allows the use of accelerators (keyboard combinations)
     // adding inter-process-communication (to communicate render processes and main process through chanels)
     ipc = require('ipc'), 
@@ -15,6 +16,15 @@ var app = require('app'),
     settingsWindow = null;
 
 app.on('ready', function () { //reacting to the ready state of the application
+
+    // reading if there is any configuration stored yet, 
+    // if not, adding an initial value
+    if (!configuration.readSettings('shortcutKeys')) {
+        configuration.saveSettings('shortcutKeys', ['ctrl', 'shift']);
+    }
+
+    setGlobalShortcuts();
+
     // this window's renderer process will render index.html
     mainWindow = new BrowserWindow({
         frame: false,
@@ -24,21 +34,24 @@ app.on('ready', function () { //reacting to the ready state of the application
     });
 
     mainWindow.loadUrl('file://' + __dirname + '/app/index.html');
+});
 
-    /*
-        Registering the shortcuts for the app
-     */
+function setGlobalShortcuts() {
+    // resets the global shortcuts so that we can set new ones
+    globalShortcut.unregisterAll();
 
-    globalShortcut.register('ctrl+shift+1', function () {
-        // sending a message on the global-shortcut channel with an argument
-        mainWindow.webContents.send('global-shortcut', 0); 
+    var shortcutKeysSetting = configuration.readSettings('shortcutKeys'),
+        // transforming the settings into an accelerator compatible string
+        shortcutPrefix = shortcutKeysSetting.length === 0 ? '' : shortcutKeysSetting.join('+') + '+';
+
+    globalShortcut.register(shortcutPrefix + '1', function () {
+        mainWindow.webContents.send('global-shortcut', 0);
     });
 
-    globalShortcut.register('ctrl+shift+2', function () {
+    globalShortcut.register(shortcutPrefix + '2', function () {
         mainWindow.webContents.send('global-shortcut', 1);
     });
-
-});
+}
 
 // listening on the close-main-window channel
 ipc.on('close-main-window', function () {
@@ -68,4 +81,8 @@ ipc.on('close-settings-window', function () {
     if (settingsWindow) {
         settingsWindow.close();
     }
+});
+
+ipc.on('set-global-shortcuts', function () {
+    setGlobalShortcuts();
 });
