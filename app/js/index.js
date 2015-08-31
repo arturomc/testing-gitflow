@@ -1,6 +1,8 @@
 'use strict';
 
 var soundButtons = document.querySelectorAll('.button-sound'),
+    ipc = require('ipc'),
+    closeEl,
     i;
 
 for (i = 0; i < soundButtons.length; i++) {
@@ -19,3 +21,8 @@ function prepareButton(buttonEl, soundName) {
         audio.play();
     });
 }
+
+closeEl = document.querySelector('.close');
+closeEl.addEventListener('click', function () {
+    ipc.send('close-main-window'); // communicating this render process to the main proces (see main.js)
+});
