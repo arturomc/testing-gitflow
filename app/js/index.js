@@ -1,10 +1,19 @@
 'use strict';
 
-var soundButtons = document.querySelectorAll('.button-sound'),
-    ipc = require('ipc'),
+var ipc = require('ipc'),
+    path = require('path'),
+    // Native GUI modules required remotely 
+    // and that way it is safe to use them here
+    remote = require('remote'),
+    Menu = remote.require('menu'),
+    Tray = remote.require('tray'),
     closeEl = document.querySelector('.close'),
     settingsEl = document.querySelector('.settings'),
-    i;
+    soundButtons = document.querySelectorAll('.button-sound'),
+    i,
+    trayIcon = null,
+    trayMenu,
+    trayMenuTemplate;
 
 for (i = 0; i < soundButtons.length; i++) {
     var soundButton = soundButtons[i],
@@ -35,3 +44,36 @@ ipc.on('global-shortcut', function (arg) {
 settingsEl.addEventListener('click', function () {
     ipc.send('open-settings-window');
 });
+
+if (process.platform === 'darwin') {
+    trayIcon = new Tray(path.join(__dirname, 'img/tray-iconTemplate.png'));
+} else {
+    trayIcon = new Tray(path.join(__dirname, 'img/tray-icon-alt.png'));
+}
+
+trayMenuTemplate = [{
+    label: 'Sound machine',
+    enabled: false
+}, {
+    label: 'Settings',
+    click: function () {
+        ipc.send('open-settings-window');
+    }
+}, {
+    label: 'Quit',
+    click: function () {
+        ipc.send('close-main-window');
+    }
+}];
+
+// There are multiple ways of building a menu in Electron. 
+// This way creates a menu template (a simple array with menu items) and builds a menu from that template. 
+// At the end, the new menu is attached to the tray icon.
+
+trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
+
+// A tray icon is defined through its icon. 
+// OS X supports image templates (by convention, an image is considered a template image 
+// if its filename ends with “Template”) which makes it easy to work with the dark and light themes. 
+// Other OSes get a regular icon.
+trayIcon.setContextMenu(trayMenu);
